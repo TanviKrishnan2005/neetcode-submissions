@@ -1,0 +1,63 @@
+class Solution {
+    // 4 possible directions: down, up, right, left
+    vector<pair<int, int>> directions = {{1, 0}, {-1, 0},
+                                         {0, 1}, {0, -1}};
+public:
+    vector<vector<int>> pacificAtlantic(vector<vector<int>>& heights) {
+        int ROWS = heights.size(), COLS = heights[0].size();
+
+        // Track cells reachable from Pacific and Atlantic
+        vector<vector<bool>> pac(ROWS, vector<bool>(COLS, false));
+        vector<vector<bool>> atl(ROWS, vector<bool>(COLS, false));
+
+        // Start DFS from top (Pacific) and bottom (Atlantic)
+        for (int c = 0; c < COLS; ++c) {
+            dfs(0, c, pac, heights);
+            dfs(ROWS - 1, c, atl, heights);
+        }
+
+        // Start DFS from left (Pacific) and right (Atlantic)
+        for (int r = 0; r < ROWS; ++r) {
+            dfs(r, 0, pac, heights);
+            dfs(r, COLS - 1, atl, heights);
+        }
+
+        vector<vector<int>> res;
+
+        // Cells reachable from both oceans
+        for (int r = 0; r < ROWS; ++r) {
+            for (int c = 0; c < COLS; ++c) {
+                if (pac[r][c] && atl[r][c]) {
+                    res.push_back({r, c});
+                }
+            }
+        }
+
+        return res;
+    }
+
+private:
+    void dfs(int r, int c,
+             vector<vector<bool>>& ocean,
+             vector<vector<int>>& heights) {
+
+        // Mark current cell as visited
+        ocean[r][c] = true;
+
+        // Explore all 4 directions
+        for (auto [dr, dc] : directions) {
+
+            int nr = r + dr;
+            int nc = c + dc;
+
+            // Valid cell, not visited, and height is non-decreasing
+            if (nr >= 0 && nr < heights.size() &&
+                nc >= 0 && nc < heights[0].size() &&
+                !ocean[nr][nc] &&
+                heights[nr][nc] >= heights[r][c]) {
+
+                dfs(nr, nc, ocean, heights);
+            }
+        }
+    }
+};
